@@ -1,0 +1,24 @@
+(defcap ALLOW_ENTRY (user-id:string)
+ (with-read user-table user-id
+    { "guard":= guard, "active":= active}
+    (enforce-guard guard)
+    (enforce active "Only active users are allowed entry")
+    )
+)
+
+(defpact payment (payer payer-entity payee payee-entity amount)
+  (step-with-rollback payer-entity
+    (debit payer amount)
+    (credit payer amount))
+  (step payee-entity
+    (credit payee amount))
+)
+
+(defschema user-schema
+    account:string
+    guard:string
+    balance:decimal
+)
+
+(deftable users:{user-schema})
+(create-table users)

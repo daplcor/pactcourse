@@ -1,0 +1,88 @@
+(load "init.repl")
+
+(interface calculator-interface 
+
+    (defschema number-values
+        @doc "stores number values"
+        name:string
+        value:decimal
+    )
+
+    (defun add:decimal (x:decimal y:decimal)
+      @doc "Adds two numbers together"
+    )
+)
+
+(env-data {
+    "gov": {
+        "keys": ["test"],
+        "pred": "keys-all"
+    },
+    "cal": {
+        "keys": ["cal-test"],
+        "pred": "keys-all"
+    }
+})
+
+(namespace 'free)
+(define-keyset "free.gov" (read-keyset "gov"))
+(define-keyset "free.cal" (read-keyset "cal"))
+
+(module mod4 GOV
+    (defcap GOV ()
+    (enforce-guard (keyset-ref-guard "free.gov"))
+    )
+
+    (defcap CAL ()
+    (enforce-guard (keyset-ref-guard "free.cal"))
+    )
+
+    (implements calculator-interface)
+    (defschema guard-schema
+        account:string
+        guard:guard
+    )
+
+    (deftable g:{guard-schema})
+
+    (deftable numbers:{number-values})
+(defun G () true)
+; Guard Testing
+(defun add-g (account:string)
+ @doc "Add new guard to the table"
+ (insert g account
+    {'account: account, 'guard: (create-user-guard (G))}
+    )
+)
+
+(defun get-g (account:string)
+ @doc "Returns the account guard stored in our table"
+ (read g account)
+)
+
+ ; Calculator Functions
+ (defun add:decimal (x:decimal y:decimal)
+ (require-capability (CAL))
+  (+ x y)
+ )
+
+ (defun add-write (x:decimal y:decimal name:string)
+    (with-capability (CAL)
+        (let (
+            (value:decimal (add x y))
+        )
+            (insert numbers name
+                {
+                    'name: name
+                ,'value:value
+                }
+                )
+            )  
+    )
+ )
+    (defun get-adds (name:string)
+     (read numbers name)
+    )
+)
+(create-table mod4.numbers)
+(create-table mod4.g)

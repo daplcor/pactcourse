@@ -1,0 +1,132 @@
+(load "init.repl")
+
+(interface calculator-interface 
+
+    (defschema number-values
+        @doc "stores number values"
+        name:string
+        value:decimal
+    )
+
+    (defun add:decimal (x:decimal y:decimal)
+      @doc "Adds two numbers together"
+    )
+)
+(begin-tx)
+(env-data {
+    "gov": {
+        "keys": ["test"],
+        "pred": "keys-all"
+    },
+    "cal": {
+        "keys": ["cal-test"],
+        "pred": "keys-all"
+    }
+})
+
+(namespace 'free)
+(define-keyset "free.gov" (read-keyset "gov"))
+(define-keyset "free.cal" (read-keyset "cal"))
+
+(module mod5 GOV
+
+    @model [
+        (defproperty is-valid-number(x:decimal)
+        (or (> x 0.0) (= x 0.0))
+        )
+    ]
+
+     ; Calculator Functions
+ (defun add:decimal (x:decimal y:decimal)
+    @model [
+        ; Ensure both inputs are positive or zero
+        (property (is-valid-number x))
+        (property (is-valid-number y))
+    ]
+
+    (enforce (and (>= x 0.0) (>= y 0.0))
+        "Both numbers must be positive or zero"
+        )
+    (+ x y)
+ )
+
+       (defcap GOV ()
+    (enforce-guard (keyset-ref-guard "free.gov"))
+    )
+
+    (defcap CAL (account:string)
+    "Capability to enforce calendar access."
+    (with-read g account {"guard" := guard}
+      (enforce-one "At least one guard must be satisfied"
+        [(enforce-guard (keyset-ref-guard "free.cal"))
+         (enforce-guard guard)]))
+  )
+  
+
+    (defschema guard-schema
+        account:string
+        guard:guard
+    )
+
+    (deftable g:{guard-schema})
+
+    (defschema number-values
+        @doc "stores number values"
+        name:string
+        value:decimal
+    )
+    (deftable numbers:{number-values})
+
+; Guard Testing
+(defun add-g (account:string guard:guard)
+ @doc "Add new guard to the table"
+ (insert g account
+    {'account: account, 'guard: guard}
+    )
+)
+
+(defun get-g (account:string)
+ @doc "Returns the account guard stored in our table"
+ (read g account)
+)
+
+
+
+   
+
+ (defun add-write (x:decimal y:decimal name:string)
+ 
+        (let (
+            (value:decimal (add x y))
+        )
+            (insert numbers name
+                {
+                    'name: name
+                ,'value:value
+                }
+                )
+            )  
+ )
+
+ (defun exception (name:string)
+ (enforce-one "Name must be 'test or 'test2"
+    [(= name "test")
+     (= name "test2")])
+ )
+
+ (defun exception1 (name:string)
+ (if (or (= name "test")
+         (= name "test2"))
+    (format "{} is valid" [name])
+    (format "{} is invalid" [name])
+ ))
+
+(defun get-adds (name:string)
+    (read numbers name)
+)
+)
+(create-table mod5.numbers)
+(create-table mod5.g)
+(commit-tx)
+
+(verify "free.mod5")

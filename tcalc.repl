@@ -1,0 +1,21 @@
+(module calculator GOV
+    (defcap GOV () true)
+    
+ ; Function to add two numbers   
+ (defun add:decimal (x:decimal y:decimal)
+  @doc "Add X and Y"
+  (+ x y)
+ )
+
+ ; Function to subtract Y from X
+ (defun subtract (x:decimal y:decimal)
+  @doc "Subtract Y from X"
+  (- x y)
+ )
+
+ ; Function to calculate the sum of a list of numbers
+ (defun sum (numbers:[integer])
+  (fold (+) 0 numbers)
+ )
+
+)

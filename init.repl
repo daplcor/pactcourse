@@ -1,0 +1,15 @@
+(begin-tx)
+(module basic-guards GOV
+    (defcap GOV () true)
+ 
+    (defconst GUARD_SUCCESS (create-user-guard (success)))
+    (defconst GUARD_FAILURE (create-user-guard (failure)))
+ 
+    (defun success () true)
+    (defun failure () (enforce false "Disabled"))
+ )
+(commit-tx)
+(begin-tx)
+(use basic-guards)
+(define-namespace 'free GUARD_SUCCESS GUARD_SUCCESS)
+(commit-tx)

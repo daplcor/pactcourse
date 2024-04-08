@@ -1,0 +1,104 @@
+(load "init.repl")
+
+(begin-tx)
+(env-data {
+    "gov": {
+        "keys": ["gov"],
+        "pred": "keys-all"
+    },
+    "vote": {
+        "keys": ["vote"],
+        "pred": "keys-all"
+    }
+})
+
+(namespace 'free)
+(define-keyset "free.gov" (read-keyset "gov"))
+(define-keyset "free.vote" (read-keyset "vote"))
+(module vote GOV
+
+    @model [
+        (defproperty is-vote-option(x:string)
+        (or (= x 'optiona) (= x 'optionb))
+        )   
+        ]
+
+   (defcap GOV ()
+    (enforce-guard (keyset-ref-guard "free.gov"))
+    )
+
+  (defschema votes-schema
+    @doc "Schema for holding votes"
+    vote-topic:string
+    optiona:integer
+    optionb:integer
+    )
+(deftable votes-table:{votes-schema})
+
+(defschema voter-schema 
+  @doc "Holds voter information"
+  account:string
+  votes:integer  
+)
+
+(deftable voters:{voter-schema})
+
+; Vote Functions
+
+(defun vote:string (account:string vote-topic:string vote:string)
+ @doc "Register a vote"
+ (let* (
+    (vote-hash:string (hash vote-topic))
+    (topica:integer (at 'optiona (read votes-table vote-hash)))
+    (topicb:integer (at 'optionb (read votes-table vote-hash)))
+ )
+ (enforce (or (= vote 'optiona) (= vote 'optionb)) "Invalid vote option")
+ 
+ (with-default-read voters account
+    {'account: "", 'votes: 0}
+    {'account:= account, 'votes:= votes}
+   (enforce (= votes 0) "You have already voted") 
+    
+    (write voters account
+        {'account: account, 'votes: 1}
+    )
+    
+    (update votes-table vote-hash
+        (if (= vote 'optiona) { 'vote-topic: vote-topic, 'optiona: (+ topica 1), 'optionb: topicb}
+        { 'vote-topic: vote-topic, 'optiona: topica, 'optionb: (+ topicb 1)}
+        )
+        )
+ )
+ (format "You have voted {} for: {}" [vote vote-topic])
+    )
+ )
+
+ (defun init-vote (vote-topic:string)
+  (let (
+    (vote-hash:string (hash vote-topic))
+  )
+  (insert votes-table vote-hash
+    {'vote-topic: vote-topic, 'optiona: 0, 'optionb: 0}
+    )
+  )
+ )
+
+(defun read-votes (vote-topic:string)
+ @doc "Supplies vote information"
+ (let (
+    (vote-data (read votes-table (hash vote-topic)))
+ )
+ (format "Votes for {}: Option A: {} Option B: {}" [vote-topic (at 'optiona vote-data) (at 'optionb vote-data)])
+
+ )
+)
+
+)
+
+(create-table vote.votes-table)
+(create-table vote.voters)
+(init-vote "vote1")
+
+(commit-tx)
+
+(verify "free.vote")

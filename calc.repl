@@ -1,0 +1,63 @@
+;; Define a module named 'calculator'
+(module calculator GOV
+    (defcap GOV () true)
+
+
+  ;; Function to add two numbers
+  (defun add (x:decimal y:decimal)
+    "Add x and y."
+    (+ x y))
+
+  ;; Function to subtract y from x
+  (defun subtract (x:decimal y:decimal)
+    "Subtract y from x."
+    (- x y))
+
+  ;; Function to calculate the sum of a list of numbers
+  (defun sum (numbers:[integer])
+  "Calculate the sum of a list of numbers."
+  (fold (+) 0 numbers))
+)
+
+
+(interface calculator-interface
+    ;; Interface function for addition
+    (defun add:decimal (x:decimal y:decimal) 
+     @doc "Adds two numbers together"
+    )
+  )
+  
+  ;; Implement the interface in a module
+  (module calculator GOV
+    (defcap GOV () true)
+
+    (implements calculator-interface)
+    
+    ;; Actual implementation of the add function
+    (defun add:decimal (x:decimal y:decimal)
+      (+ x y))
+  )
+
+  (load "init.repl")
+
+  (env-data {
+      "gov": {
+          "keys": ["test"],
+          "pred": "keys-all"
+      }
+  })
+  
+  (namespace 'free)
+  (define-keyset "free.gov" (read-keyset "gov"))
+  (module mod4 GOV
+      (defcap GOV () (enforce-guard (keyset-ref-guard "free.gov" )))
+      (defschema cost-schema
+          @doc "Stores cost values"
+          season:string
+          name:string
+          cost:decimal
+        )
+      
+        (deftable costing:{cost-schema})
+      )
+      (create-table mod4.costing)

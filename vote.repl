@@ -1,0 +1,98 @@
+(load "init.repl")
+
+(begin-tx)
+(env-data {
+    "gov": {
+        "keys": ["gov"],
+        "pred": "keys-all"
+    },
+    "vote": {
+        "keys": ["vote"],
+        "pred": "keys-all"
+    }
+})
+
+(namespace 'free)
+(define-keyset "free.gov" (read-keyset "gov"))
+(define-keyset "free.vote" (read-keyset "vote"))
+
+(module vote GOV
+
+    @model [
+        (defproperty is-vote-once(x:integer)
+        (< x 1))      
+        ]
+
+
+
+   (defcap GOV ()
+    (enforce-guard (keyset-ref-guard "free.gov"))
+    )
+
+    (defcap VOTER (guard:guard)
+    "Capability to enforce calendar access."
+     (enforce-guard guard)
+    )
+  
+
+(defschema vote-schema
+    @doc "Schema for holding votes."
+    vote-topic:string
+    votes:integer
+)
+
+(deftable votes-table:{vote-schema})
+
+  (defschema voter-schema
+    account:string
+    guard:guard
+    votes:integer
+  )
+
+  (deftable voters:{voter-schema})
+
+
+; Vote Functions
+(defun vote:string (account:string vote-topic:string guard:guard)
+     (let* (
+        (vote-hash:string (hash vote-topic))
+        (topic-votes:integer (at 'votes (read votes-table vote-hash)))
+        )
+  (with-capability (VOTER guard)
+  (with-default-read voters account
+    { 'account: "", 'votes: 0}
+    {'account:= account,'votes:= votes}
+    (enforce (!= votes 0) "You have already voted")
+    (write voters account
+    { 'account: account, 'guard: guard, 'votes: (+ votes 1)})
+    (update votes-table vote-hash
+    { 'vote-topic: vote-topic, 'votes: (+ topic-votes 1)})
+  )
+    
+ )
+ (format "You have voted for: {}" [vote-topic])
+ )
+)
+
+
+  (defun init-vote (vote-topic:string)
+    (let (
+        (vote-hash:string (hash vote-topic))
+    )
+     (insert votes-table vote-hash
+        { 'vote-topic: vote-topic, 'votes: 0})
+    )
+  )
+  
+
+ (defun read-votes (vote-topic:string)
+    (at 'votes (read votes-table (hash vote-topic)))
+ )
+
+)
+(create-table vote.votes-table)
+(create-table vote.voters)
+(init-vote "vote1")
+(commit-tx)
+
+(verify "free.vote")
