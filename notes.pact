@@ -70,9 +70,9 @@ your way to developing robust and secure smart contracts. I encourage you to bui
 upon this calculator app, exploring more of what Pact has to offer. Happy coding, and 
 remember, the blockchain is your canvas!"
 
-Conditional statements are a core aspect of programming logic, allowing you to 
+"Conditional statements are a core aspect of programming logic, allowing you to 
 execute different code paths based on certain conditions. In Pact, if/else statements 
-are used for this purpose.
+are used for this purpose."
 
 
 (if (> 1 5) "Greater than 5" "5 or less")
