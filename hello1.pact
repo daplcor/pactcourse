@@ -245,3 +245,15 @@ are used for this purpose.
     (property (is-valid-number x))
     (property (is-valid-number y))
  ]
+
+
+  (defun read-with-votes (vote-topic:string)
+   @doc "Supplies more vote information"
+   (with-read votes-table vote-topic { 'optiona:=optiona, 'optionb:=optionb}
+   (format "Votes for {}: Option A: {} Option B: {}" [vote-topic optiona optionb])
+   )
+ )
+
+; Returns all table keys
+ (defun key ()
+(keys votes-table))

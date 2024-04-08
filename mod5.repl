@@ -130,3 +130,23 @@
 (commit-tx)
 
 (verify "free.mod5")
+
+(module hello GOV
+    (defcap GOV () true)
+
+(defun hello-world (name:string)
+    (format "Hello, {}" [name])
+)
+    )
+
+    (expect "Calling hello-world with a string argument" "Hello, Felix" (hello-world "Felix"))
+
+(expect-failure "Calling hello-world with an integer argument"
+  (hello-world 123))
+
+(expect-failure "Calling hello-world with a boolean argument"
+  (hello-world true))
+
+(expect-failure "Calling hello-world with no argument"
+  (hello-world))
+(commit-tx)
