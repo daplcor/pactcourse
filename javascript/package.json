@@ -1,0 +1,22 @@
+{
+  "name": "pactcourse",
+  "version": "1.0.0",
+  "description": "Sample code for executing Kadena Blockchain commands.",
+  "main": "pact.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "pact",
+    "kadena",
+    "blockchain",
+    "javascript",
+    "code"
+  ],
+  "author": "Amir",
+  "license": "ISC",
+  "dependencies": {
+    "@kadena/client": "^1.11.0"
+  }
+}

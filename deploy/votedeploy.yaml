@@ -1,0 +1,22 @@
+codeFile: ./vote.pact
+data:
+  vote:
+    keys: ["f1e12312e4ee8c156b041c3bcc7e422e7d15cb2ddce58c6ff16742770916cfaa"]
+    pred: "keys-all"
+publicMeta:
+  chainId: "1"
+  sender: "k:f1e12312e4ee8c156b041c3bcc7e422e7d15cb2ddce58c6ff16742770916cfaa"
+  gasLimit: 100000
+  gasPrice: 0.0000001
+  ttl: 7200
+networkId: "testnet04"
+keyPairs:
+  - public: "f1e12312e4ee8c156b041c3bcc7e422e7d15cb2ddce58c6ff16742770916cfaa"
+    secret: "51706550afecf92a17311bbe4e7d0c8d2ff0f09484a2c8ff3e305d17ba904c8d"
+    caps:
+      - name: "coin.GAS"
+        args: []
+  - public: "f1e12312e4ee8c156b041c3bcc7e422e7d15cb2ddce58c6ff16742770916cfaa"
+    secret: "51706550afecf92a17311bbe4e7d0c8d2ff0f09484a2c8ff3e305d17ba904c8d"
+    caps: []
+type: exec
