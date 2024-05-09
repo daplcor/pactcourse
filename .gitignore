@@ -2,3 +2,4 @@
 .pact_history
 /.vscode
 /coverage
+./javascript-cli/node_modules

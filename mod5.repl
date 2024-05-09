@@ -55,7 +55,7 @@
     )
 
     (defcap CAL (account:string)
-    "Capability to enforce calendar access."
+    "Capability to enforce calculator access."
     (with-read g account {"guard" := guard}
       (enforce-one "At least one guard must be satisfied"
         [(enforce-guard (keyset-ref-guard "free.cal"))
@@ -89,10 +89,6 @@
  @doc "Returns the account guard stored in our table"
  (read g account)
 )
-
-
-
-   
 
  (defun add-write (x:decimal y:decimal name:string)
  
