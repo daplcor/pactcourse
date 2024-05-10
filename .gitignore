@@ -3,3 +3,4 @@
 /.vscode
 /coverage
 ./javascript-cli/node_modules
+notes.pact

@@ -1,6 +1,5 @@
 (load "init.repl")
 
-(begin-tx)
 
 (interface calculator-interface
     (defun add:decimal (x:decimal y:decimal)
@@ -13,7 +12,7 @@
 		value:decimal
 	)
 )
-(begin-tx "load environment")
+(begin-tx)
 (env-data {
     "gov": {
         "keys": ["test"],
@@ -32,7 +31,22 @@
 (module mod5 GOV
     
     
-    (defcap GOV ()
+    
+; This was added
+    @model [
+        (defproperty is-valid-number(x:decimal)
+        (or (> x 0.0) (= x 0.0))
+        )
+    ]
+
+;For Jordan I moved this up here and removed account:string
+   ; Calculator Functions
+  (defun add:decimal (x:decimal y:decimal)
+  ;Remove (require-capability (CAL account))
+    (+ x y)
+  )
+
+  (defcap GOV ()
 	(enforce-guard (keyset-ref-guard "free.gov"))
     )
 
@@ -52,7 +66,7 @@
     (deftable g:{guard-schema})
 
     (deftable numbers:{number-values})
-
+; For Jordan Make sure number-values is here
     (defschema number-values
 		@doc "stores number values"
 		name:string
@@ -72,16 +86,11 @@
 (read g account)
 )
 
-  ; Calculator Functions
-  (defun add:decimal (x:decimal y:decimal account:string)
-   (require-capability (CAL account))
-    (+ x y)
-  )
-
-(defun add-write (x:decimal y:decimal name:string account:string)
-    (with-capability (CAL account)
+ ; For Jordan, I removed account:string and account from value:decimal (add x y account)
+(defun add-write (x:decimal y:decimal name:string)
+    ; Remove (with-capability (CAL account)
         (let (
-            (value:decimal (add x y account))
+            (value:decimal (add x y))
         )
             (insert numbers name
                 {
@@ -90,9 +99,21 @@
                 }
                 )
             )
-    )
+   ; Remove )
 )
 
+(defun exception (name:string)
+ (enforce-one "Name must be 'test or 'test2"
+    [(= name "test")
+     (= name "test2")])
+ )
+
+ (defun exception1 (name:string)
+ (if (or (= name "test")
+         (= name "test2"))
+    (format "{} is valid" [name])
+    (format "{} is invalid" [name])
+ ))
 
 (defun get-adds (name:string)
      (read numbers name)
@@ -101,3 +122,4 @@
 (create-table mod5.numbers)
 (create-table mod5.g)
 (commit-tx)
+(verify "free.mod5")
