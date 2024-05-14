@@ -1,0 +1,25 @@
+(load "init.repl")
+
+(begin-tx)
+(env-data {
+    "gov": {
+        "keys": ["gov"],
+        "pred": "keys-all"
+    },
+    "vote": {
+        "keys": ["vote"],
+        "pred": "keys-all"
+    }
+})
+
+(namespace 'free)
+(define-keyset "free.gov" (read-keyset "gov"))
+(define-keyset "free.vote" (read-keyset "vote"))
+
+(module vote GOV
+
+   (defcap GOV ()
+    (enforce-guard (keyset-ref-guard "free.gov"))
+   )
+
+)
