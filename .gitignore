@@ -4,3 +4,5 @@
 /coverage
 ./javascript-cli/node_modules
 notes.pact
+/deploy/votedeploypriv.yaml
+/deploy/voteinitpriv.yaml
