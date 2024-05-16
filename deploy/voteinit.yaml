@@ -1,5 +1,5 @@
 code: |
-  (free.vote-testing.vote "vote1" "optionb")
+  (free.your-module-name.vote-init "vote1")
 data:
   vote:
     keys: ["yourpublickey"]
